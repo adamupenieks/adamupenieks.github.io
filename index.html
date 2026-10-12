@@ -20,13 +20,13 @@
   :root {
     --bg:#f7f8f9; --surface:#fff; --ink:#23272b; --ink-soft:#545b62; --ink-faint:#8b9298;
     --line:#e4e7ea; --accent:#557180; --accent-deep:#3f5662;
-    --sidebar-1:#5d7a87; --sidebar-2:#45616d; --sidebar-ink:#f2f5f6; --sidebar-ink-soft:#c4d2d8;
+    --sidebar-1:#5d7a87; --sidebar-2:#45616d; --sidebar-ink:#f2f5f6; --sidebar-ink-soft:#c4d2d8; --ghost:#b8bfc5;
     --serif:"Newsreader",Georgia,serif; --sans:"Spline Sans",system-ui,sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root { --bg:#15181b; --surface:#1c2024; --ink:#e7e9ea; --ink-soft:#a7adb2; --ink-faint:#757c82;
       --line:#2c3137; --accent:#8fb0bd; --accent-deep:#a9c6d1; --sidebar-1:#3a525d; --sidebar-2:#283c45;
-      --sidebar-ink:#eef3f5; --sidebar-ink-soft:#aebec5; }
+      --sidebar-ink:#eef3f5; --sidebar-ink-soft:#aebec5; --ghost:#4a5259; }
     figure img { filter: brightness(0.92); }
   }
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -83,9 +83,11 @@
   .mini { margin:1.6rem 0 0; }
   .mini-head { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:.6rem; margin-bottom:.6rem; }
   .mini-head .t { font-size:0.74rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--accent); font-weight:600; }
-  .seg { display:inline-flex; border:1px solid var(--line); border-radius:100px; overflow:hidden; }
-  .seg button { background:transparent; border:0; color:var(--ink-soft); font:inherit; font-size:.78rem; padding:.3rem .8rem; cursor:pointer; }
-  .seg button.on { background:var(--accent); color:#fff; }
+  .mini-read { font-family:var(--serif); font-size:1rem; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .mini-read small { font-family:var(--sans); font-size:.78rem; color:var(--ink-faint); margin-left:.3rem; }
+  .mini-ctl { margin:.2rem 0 .7rem; }
+  .mini-ctl input[type=range] { width:100%; accent-color:var(--accent); cursor:pointer; }
+  .mini-ticks { display:flex; justify-content:space-between; font-size:.72rem; color:var(--ink-faint); margin-top:-.1rem; }
   .mini-chart { height:300px; border:1px solid var(--line); border-radius:6px; background:var(--surface); display:flex; align-items:center; justify-content:center; color:var(--ink-faint); font-size:.85rem; }
   figcaption { margin-top:0.6rem; font-size:0.82rem; line-height:1.5; color:var(--ink-faint); font-style:italic; }
 
@@ -196,11 +198,15 @@
 
           <figure class="mini">
             <div class="mini-head">
-              <span class="t">The market premium and where attention goes</span>
-              <div class="seg" id="homeWin"><button data-w="63">63d</button><button data-w="126" class="on">126d</button><button data-w="252">252d</button></div>
+              <span class="t">The security market line across attention states</span>
+              <span class="mini-read" id="homeRead">&nbsp;</span>
             </div>
-            <div class="mini-chart" id="homeTs">Loading chart&hellip;</div>
-            <figcaption>Fama&ndash;MacBeth market premium (solid) and attention anchored to firm-specific news (dotted, the attention residual with its sign flipped), as standardized rolling averages. When attention concentrates on firm-level news, the estimated premium tends to rise.
+            <div class="mini-ctl">
+              <input type="range" id="homeCut" min="5" max="100" step="5" value="50" aria-label="Attention-state cutoff">
+              <div class="mini-ticks"><span>Attention most anchored to firm news</span><span>All days</span></div>
+            </div>
+            <div class="mini-chart" id="homeSml">Loading chart&hellip;</div>
+            <figcaption>Average excess return against beta for ten beta-sorted portfolios. Drag the slider to keep only days whose attention residual falls below a given trailing one-year percentile. The full-sample line (hollow, dashed) is flat; the line steepens toward the CAPM as attention concentrates on firm-specific news.
               <a href="explore.html" style="color:var(--accent-deep); font-style:normal; border-bottom:1px solid var(--line);">Full interactive version &rarr;</a></figcaption>
           </figure>
         </div>
@@ -362,36 +368,38 @@
 </div>
 <script>
 (function () {
-  const el = document.getElementById("homeTs"); if (!el) return;
-  let win = 126, loaded = false;
+  const el = document.getElementById("homeSml"); if (!el) return;
+  let cut = 50, loaded = false;
   const css = k => getComputedStyle(document.documentElement).getPropertyValue(k).trim();
   const load = src => new Promise((res, rej) => { const s=document.createElement("script"); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
-  const roll = (a, w) => { const out=new Array(a.length).fill(null); let s=0,n=0;
-    for (let i=0;i<a.length;i++){ const v=a[i]; if(v!=null){s+=v;n++;} const j=i-w; if(j>=0&&a[j]!=null){s-=a[j];n--;} if(i>=w-1&&n>0) out[i]=s/n; } return out; };
-  const zs = a => { const v=a.filter(x=>x!=null); const m=v.reduce((p,q)=>p+q,0)/v.length, sd=Math.sqrt(v.reduce((p,q)=>p+(q-m)**2,0)/(v.length-1)); return a.map(x=>x==null?null:(x-m)/sd); };
+  const ols = (x, y) => { const n=x.length, mx=x.reduce((a,b)=>a+b)/n, my=y.reduce((a,b)=>a+b)/n; let sxy=0,sxx=0;
+    for (let i=0;i<n;i++){ sxy+=(x[i]-mx)*(y[i]-my); sxx+=(x[i]-mx)**2; } const b=sxy/sxx; return {b, a:my-b*mx}; };
   function draw() {
     if (el.textContent.trim().startsWith("Loading")) { el.textContent = ""; el.style.display = "block"; }
-    const T = window.EXPLORE.ts;
-    const prem = zs(roll(T.fm_vw, win)), att = zs(roll(T.uhat, win)).map(v => v==null ? null : -v);
+    const D = window.EXPLORE, S = D.states[String(cut)], U = D.states["100"];
+    const x = S.beta, ys = S.vw.mean_ret_bps, yu = U.vw.mean_ret_bps, fs = ols(x, ys), fu = ols(x, yu);
+    const xr = [Math.min(...x)-0.05, Math.max(...x)+0.05], labs = x.map((_,i)=>`Decile ${i+1}`);
     Plotly.react(el, [
-      {x:T.date, y:prem, mode:"lines", name:"Market premium", line:{color:css("--accent"), width:1.7}},
-      {x:T.date, y:att, mode:"lines", name:"Attention anchored to firm news", line:{color:css("--ink"), width:1.3, dash:"dot"}},
+      {x:xr, y:xr.map(v=>fu.a+fu.b*v), mode:"lines", name:"Full sample", line:{color:css("--ghost")||"#b8bfc5", width:1.6, dash:"dash"}, hoverinfo:"skip"},
+      {x, y:yu, mode:"markers", showlegend:false, marker:{color:"rgba(0,0,0,0)", line:{color:css("--ghost")||"#b8bfc5", width:1.5}, size:7}, text:labs, hovertemplate:"%{text}<br>β %{x:.2f} · %{y:.1f} bps<extra>Full sample</extra>"},
+      {x:xr, y:xr.map(v=>fs.a+fs.b*v), mode:"lines", name:"Selected state", line:{color:css("--accent"), width:2}, hoverinfo:"skip"},
+      {x, y:ys, mode:"markers", showlegend:false, marker:{color:css("--accent"), size:8}, text:labs, hovertemplate:"%{text}<br>β %{x:.2f} · %{y:.1f} bps<extra>Selected state</extra>"},
     ], { paper_bgcolor:"rgba(0,0,0,0)", plot_bgcolor:"rgba(0,0,0,0)",
       font:{family:getComputedStyle(document.body).fontFamily, color:css("--ink-soft"), size:11},
-      margin:{l:36,r:12,t:28,b:34}, hovermode:"x unified", showlegend:true,
-      legend:{orientation:"h", y:1.12, x:0, font:{size:11}},
-      xaxis:{gridcolor:css("--line"), linecolor:css("--line")},
-      yaxis:{gridcolor:css("--line"), zerolinecolor:css("--line"), title:{text:"std. rolling avg", font:{size:10}}},
+      margin:{l:40,r:12,t:26,b:34}, hovermode:"closest", legend:{orientation:"h", y:1.12, x:0, font:{size:11}},
+      xaxis:{title:{text:"β", font:{size:11}}, gridcolor:css("--line"), linecolor:css("--line")},
+      yaxis:{title:{text:"bps / day", font:{size:10}}, gridcolor:css("--line"), zerolinecolor:css("--line")},
     }, {displayModeBar:false, responsive:true});
-    el.style.display = "block";
+    const f = S.vw, pct = (100*S.share).toFixed(0);
+    document.getElementById("homeRead").innerHTML = (cut===100 ? "All days" : `Bottom ${cut}% of days`) +
+      ` <small>slope ${f.slope.toFixed(1)} bps, t = ${f.t_slope.toFixed(2)}</small>`;
   }
   async function init() {
     if (loaded) return; loaded = true;
     try { await Promise.all([load("https://cdn.plot.ly/plotly-2.35.2.min.js"), load("explore_data.js")]); draw(); }
     catch (e) { el.textContent = "Chart unavailable."; }
   }
-  document.querySelectorAll("#homeWin button").forEach(b => b.addEventListener("click", () => {
-    document.querySelectorAll("#homeWin button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); win=+b.dataset.w; if (loaded) draw(); }));
+  document.getElementById("homeCut").addEventListener("input", e => { cut = +e.target.value; if (loaded) draw(); });
   if ("IntersectionObserver" in window) {
     new IntersectionObserver((es, io) => { if (es.some(e=>e.isIntersecting)) { io.disconnect(); init(); } }, {rootMargin:"400px"}).observe(el);
   } else init();
