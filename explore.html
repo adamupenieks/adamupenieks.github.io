@@ -75,6 +75,8 @@
   pre { background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:1.1rem 1.2rem; overflow-x:auto; font-size:.8rem; line-height:1.5; color:var(--ink-soft); margin-top:1rem; }
   .note { font-size:.9rem; color:var(--ink-soft); max-width:70ch; }
   .note + .note { margin-top:.8rem; }
+  .btn { display:inline-block; margin-top:1rem; padding:.6rem 1.2rem; border-radius:100px; background:var(--accent); color:#fff; font-size:.88rem; font-weight:500; border:0; cursor:pointer; font-family:var(--sans); }
+  .btn:hover { background:var(--accent-deep); }
   footer { border-top:1px solid var(--line); padding:2rem clamp(1.4rem,5vw,4rem); font-size:.8rem; color:var(--ink-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:.5rem; }
 </style>
 </head>
@@ -124,6 +126,10 @@
       <thead><tr><th>State</th><th>Share of days</th><th>Slope (bps)</th><th>t</th><th>Intercept (bps)</th><th>t</th><th>Avg R&sup2;</th></tr></thead>
       <tbody></tbody>
     </table>
+    <div style="margin-top:1.4rem">
+      <button class="btn" id="dlState">Download the state variable (CSV)</button>
+      <p class="note" style="margin-top:.6rem">Daily attention residual (5-day rolling median) and the paper's two state indicators, March 2012 to December 2024. Please cite the paper if you use it.</p>
+    </div>
     <p class="note" style="margin-top:.8rem">Table rows are daily Fama&ndash;MacBeth regressions of next-day portfolio excess returns on prior-day rolling betas, averaged over the days in each state, with time-series t-statistics. The two "paper" rows use the exact state definitions from the paper; the "selected" row uses the slider's cutoff.</p>
   </section>
 
@@ -261,6 +267,17 @@
   seg("pw", w => { pw=w; drawTS(); });
   seg("att", w => { att=w; drawTS(); });
   if (!D.ts.iai.some(v=>v!=null)) { const b=document.getElementById("iaiBtn"); b.disabled=true; b.title="Series not yet included"; }
+
+  document.getElementById("dlState").addEventListener("click", () => {
+    const T = D.ts;
+    const head = ["# Attention-state variable from Upenieks (2026), Looking Away from the Market, https://adamupenieks.com/LAFM_Sept7.pdf",
+                  "# uhat_med5: 5-day rolling median of the residual from an expanding regression of aggregate institutional attention on idiosyncratic news attention",
+                  "# state_low50 / state_low25: 1 when uhat_med5 is below its trailing one-year 50th / 25th percentile (the paper's definitions)",
+                  "date,uhat_med5,state_low50,state_low25"];
+    const rows = T.date.map((dt,i)=>`${dt},${T.uhat[i]},${T.state_low50[i]},${T.state_low25[i]}`);
+    const blob = new Blob([head.concat(rows).join("\n")], {type:"text/csv"});
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "upenieks_attention_state_daily.csv"; a.click(); URL.revokeObjectURL(a.href);
+  });
 
   document.getElementById("sample").textContent = `${D.sample.start} to ${D.sample.end}, ${D.sample.days.toLocaleString()} trading days`;
   document.getElementById("through").textContent = D.sample.end;

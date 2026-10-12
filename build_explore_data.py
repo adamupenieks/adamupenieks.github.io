@@ -76,6 +76,8 @@ ts = dict(
     uhat=[round(float(x), 5) for x in d["uhat_med5"]],
     aia=[round(float(x), 4) for x in p["aia"]],
     iai=[None if pd.isna(x) else round(float(x), 4) for x in p["iai"]],
+    state_low50=[int(x) for x in d["state_low50"]],
+    state_low25=[int(x) for x in d["state_low25"]],
 )
 
 payload = dict(
