@@ -87,9 +87,6 @@
   .edu-item .deg { font-family:var(--serif); font-size:1.15rem; }
   .edu-item .school { color:var(--ink-soft); font-size:0.92rem; margin-top:0.15rem; }
   .edu-item .year { color:var(--ink-faint); font-size:0.85rem; white-space:nowrap; text-align:right; }
-  .edu-item .links { display:flex; flex-direction:column; align-items:flex-end; gap:0.35rem; }
-  .edu-item .links a { font-size:0.85rem; letter-spacing:0.04em; color:var(--accent-deep); border-bottom:1px solid var(--line); white-space:nowrap; transition:border-color .25s; }
-  .edu-item .links a:hover { border-color:var(--accent); }
 
   .ref-item { display:flex; justify-content:space-between; gap:1.2rem 2rem; padding:1.3rem 0; border-top:1px solid var(--line); align-items:baseline; flex-wrap:wrap; }
   .ref-item:last-child { border-bottom:1px solid var(--line); }
@@ -127,12 +124,9 @@
     <nav class="fade d3">
       <a href="#about">About</a>
       <a href="#research">Research</a>
-      <a href="#discussions">Discussions</a>
-      <a href="#teaching">Teaching</a>
       <a href="#education">Education</a>
       <a href="#references">References</a>
       <a href="#contact">Contact</a>
-      <a href="Adam_Upenieks_CV_2026.pdf" target="_blank" rel="noopener">CV</a>
     </nav>
     <div class="social fade d4">
       <a href="mailto:adam.upenieks@ucalgary.ca">Email</a>
@@ -144,9 +138,8 @@
 
   <main>
     <section class="intro fade d2" id="about">
-      <p>Welcome. I'm a sixth-year PhD candidate in Finance at the University of Calgary, on the academic job market for the 2026&ndash;27 cycle.</p>
-      <p>My research is in <em>asset pricing and information economics</em>. I study the gap between the information that is publicly available and the information that ends up in prices. Each of my papers focuses on a different friction along the way: when firm-specific news arrives and how it corrects mispricing in <a href="BetaBetweenHeadlines_Aug31.pdf"><em>Beta Between the Headlines</em></a>, how investors divide limited attention between firm-specific and market-wide information in <a href="LAFM_Sept7.pdf"><em>Looking Away from the Market</em></a>, and how they form beliefs from public narratives in <a href="Overreaction_draft_Sept15.pdf"><em>Overreaction to Scarcity</em></a>.</p>
-
+      <p>Welcome. I'm a fifth-year PhD candidate in Finance at the University of Calgary, on the academic job market for the 2026&ndash;27 cycle.</p>
+      <p>My research is in <em>asset pricing and information economics</em>. I study how investor attention and the flow of firm-specific news shape the pricing of risk &mdash; and what that implies for the CAPM and the slope of the security market line.</p>
       <p>You can reach me at <a href="mailto:adam.upenieks@ucalgary.ca">adam.upenieks@ucalgary.ca</a>, and my CV is available <a href="#contact">here</a>.</p>
     </section>
 
@@ -184,6 +177,7 @@
           <div style="display:flex; flex-direction:column; align-items:flex-start; gap:0.5rem; margin-top:1rem;">
             <a class="pdf" style="margin-top:0;" href="LAFM_Sept7.pdf">Read the paper (PDF) &rarr;</a>
             <a class="pdf" style="margin-top:0;" href="Internet_Appendix_Concentration_CAPM.pdf">Internet Appendix (PDF) &rarr;</a>
+            <a class="pdf" style="margin-top:0;" href="explore.html">Explore the data interactively &rarr;</a>
           </div>
         </div>
 
@@ -233,36 +227,7 @@
             pushes forecasts up and future returns down, predicts returns out of sample, and is followed by
             net selling from speculators and reduced hedging by producers. Expectations about future scarcity,
             rather than realized demand or supply, drive the oil price movements that later reverse.</p>
-          <p class="pres"><b>Presented at:</b> 10th Commodity Markets Winter Workshop 2027*</p>
-          <p style="margin-top:0.35rem; font-size:0.78rem; color:var(--ink-faint);">* Scheduled</p>
           <a class="pdf" href="Overreaction_draft_Sept15.pdf">Read the paper (PDF) &rarr;</a>
-        </div>
-      </div>
-    </section>
-
-    <div class="divider"></div>
-
-    <section id="discussions">
-      <div class="eyebrow">Selected Discussions</div>
-      <div class="edu-item">
-        <div><div class="deg">The Golden CAPM</div><div class="school">Conference discussion</div></div>
-        <div class="links"><a href="golden_capm_pdf_version.pdf">Slides (PDF) &rarr;</a></div>
-      </div>
-      <div class="edu-item">
-        <div><div class="deg">Time Series Momentum across the Capital Structure</div><div class="school">Conference discussion</div></div>
-        <div class="links"><a href="mom_disc_v1_3.pdf">Slides (PDF) &rarr;</a></div>
-      </div>
-    </section>
-
-    <div class="divider"></div>
-
-    <section id="teaching">
-      <div class="eyebrow">Teaching</div>
-      <div class="edu-item">
-        <div><div class="deg">Futures and Options (FNCE 445)</div><div class="school">Instructor &middot; Haskayne School of Business &middot; Winter 2025, two sections</div></div>
-        <div class="links">
-          <a href="2025%20Winter%20Course%20Survey%20Report%20FNCE445-LEC-01-Upenieks.pdf">Evaluations, Section 01 (PDF) &rarr;</a>
-          <a href="2025%20Winter%20Course%20Survey%20Report%20FNCE445-LEC-02-Upenieks.pdf">Evaluations, Section 02 (PDF) &rarr;</a>
         </div>
       </div>
     </section>
@@ -311,16 +276,6 @@
         <div class="ref-links">
           <a href="https://profiles.ucalgary.ca/alexander-david" target="_blank" rel="noopener">Website</a>
           <a href="mailto:alexander.david@haskayne.ucalgary.ca">Email</a>
-        </div>
-      </div>
-      <div class="ref-item">
-        <div>
-          <div class="ref-name">Charles Martineau</div>
-          <div class="ref-aff">Associate Professor of Finance, Rotman School of Management, University of Toronto</div>
-        </div>
-        <div class="ref-links">
-          <a href="https://www.charlesmartineau.com/" target="_blank" rel="noopener">Website</a>
-          <a href="mailto:charles.martineau@utoronto.ca">Email</a>
         </div>
       </div>
     </section>
