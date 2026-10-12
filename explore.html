@@ -89,6 +89,7 @@
   <div class="eyebrow">Explore the data</div>
   <h1>When does beta get priced?</h1>
   <p class="lede">The security market line is famously too flat. Drag the cutoff below to restrict the sample to days when institutional attention is concentrated on <em>firm-specific news</em>, and watch the line steepen toward the CAPM. Every number on this page is computed from the data behind <a href="LAFM_Sept7.pdf">Looking Away from the Market</a>.</p>
+  <p class="note" style="margin-top:1rem">A note on the sample: the portfolios here are built from the roughly 2,500 stocks with Bloomberg institutional attention data, because that is what the attention residual requires. The state variable is not specific to that sample. In the paper it also prices beta across the full CRSP universe of individual stocks.</p>
 
   <div class="stats">
     <div class="stat"><div class="k">Days in state</div><div class="v" id="s-share">&ndash;</div></div>
@@ -155,6 +156,7 @@
     <h2>How this page is built</h2>
     <p class="note">Nothing on this page is computed on a server. A Python script (below) reads the daily portfolio returns, rolling betas, and the attention residual, and writes a small file of summary statistics: for each cutoff, the ten portfolio mean returns and the Fama&ndash;MacBeth slope, intercept, t-statistics, and R&sup2;. The page reads that file and redraws when you move the slider. The underlying CRSP, Dow Jones, and Bloomberg data are licensed and are not distributed here.</p>
     <p class="note">Sample: <span id="sample"></span>. Portfolio construction, the attention residual, and the state definitions follow <a href="LAFM_Sept7.pdf">the paper</a>, Sections 3 and 4.</p>
+    <p class="note">The script below is an AI-replicated, condensed version of my hand-written research notebook, reduced to the steps needed to produce this page. The original hand-written code is available upon request.</p>
     <pre id="code"></pre>
     <p class="note"><a href="build_explore_data.py">Download the script</a> &middot; <a href="explore_data.js">Download the summary data</a></p>
   </section>
