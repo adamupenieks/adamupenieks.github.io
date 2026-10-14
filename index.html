@@ -374,9 +374,11 @@
   const load = src => new Promise((res, rej) => { const s=document.createElement("script"); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
   const ols = (x, y) => { const n=x.length, mx=x.reduce((a,b)=>a+b)/n, my=y.reduce((a,b)=>a+b)/n; let sxy=0,sxx=0;
     for (let i=0;i<n;i++){ sxy+=(x[i]-mx)*(y[i]-my); sxx+=(x[i]-mx)**2; } const b=sxy/sxx; return {b, a:my-b*mx}; };
+  let YMAX = null;
   function draw() {
     if (el.textContent.trim().startsWith("Loading")) { el.textContent = ""; el.style.display = "block"; }
     const D = window.EXPLORE, S = D.states[String(cut)], U = D.states["100"];
+    if (YMAX === null) { let m = 0; for (const k in D.states) for (const w of ["vw","ew"]) m = Math.max(m, ...D.states[k][w].mean_ret_bps); YMAX = Math.ceil(m / 5) * 5 + 3; }
     const x = S.beta, ys = S.vw.mean_ret_bps, yu = U.vw.mean_ret_bps, fs = ols(x, ys), fu = ols(x, yu);
     const xr = [Math.min(...x)-0.05, Math.max(...x)+0.05], labs = x.map((_,i)=>`Decile ${i+1}`);
     Plotly.react(el, [
@@ -387,8 +389,9 @@
     ], { paper_bgcolor:"rgba(0,0,0,0)", plot_bgcolor:"rgba(0,0,0,0)",
       font:{family:getComputedStyle(document.body).fontFamily, color:css("--ink-soft"), size:11},
       margin:{l:40,r:12,t:26,b:34}, hovermode:"closest", legend:{orientation:"h", y:1.12, x:0, font:{size:11}},
-      xaxis:{title:{text:"β", font:{size:11}}, gridcolor:css("--line"), linecolor:css("--line")},
-      yaxis:{title:{text:"bps / day", font:{size:10}}, gridcolor:css("--line"), zerolinecolor:css("--line")},
+      yaxis:{title:{text:"bps / day", font:{size:10}}, gridcolor:css("--line"), zerolinecolor:css("--line"), range:[0, YMAX], fixedrange:true},
+      xaxis:{title:{text:"β", font:{size:11}}, gridcolor:css("--line"), linecolor:css("--line"), fixedrange:true},
+      transition:{duration:350, easing:"cubic-in-out"},
     }, {displayModeBar:false, responsive:true});
     const f = S.vw, pct = (100*S.share).toFixed(0);
     document.getElementById("homeRead").innerHTML = (cut===100 ? "All days" : `Bottom ${cut}% of days`) +
