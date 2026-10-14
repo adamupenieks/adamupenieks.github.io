@@ -174,7 +174,7 @@
 (function () {
   const D = window.EXPLORE;
   const css = k => getComputedStyle(document.documentElement).getPropertyValue(k).trim();
-  let cut = 50, wt = "vw", win = 126, pw = "fm_vw", att = "uhat", YMAX = null;
+  let cut = 50, wt = "vw", win = 126, pw = "fm_vw", att = "uhat";
 
   const fmt = (x, d=1) => (x == null || isNaN(x)) ? "–" : x.toFixed(d);
   const pct = x => (100 * x).toFixed(0) + "%";
@@ -208,11 +208,9 @@
       line(fs, css("--accent"), "solid", cut===100 ? "Selected (= full sample)" : `Selected state fit`),
       {x, y:ys, mode:"markers", name:`Selected state`, marker:{color:css("--accent"), size:10}, text:labs, hovertemplate:"%{text}<br>β = %{x:.2f}<br>%{y:.1f} bps/day<extra>Selected state</extra>"},
     ];
-    if (YMAX === null) { let m = 0; for (const k in D.states) for (const w of ["vw","ew"]) m = Math.max(m, ...D.states[k][w].mean_ret_bps); YMAX = Math.ceil(m / 5) * 5 + 3; }
     Plotly.react("smlChart", traces, baseLayout({
-      xaxis:{title:"Portfolio beta", gridcolor:css("--line"), zerolinecolor:css("--line"), fixedrange:true},
-      yaxis:{title:"Average excess return (bps / day)", gridcolor:css("--line"), zerolinecolor:css("--line"), range:[0, YMAX], fixedrange:true},
-      transition:{duration:350, easing:"cubic-in-out"},
+      xaxis:{title:"Portfolio beta", gridcolor:css("--line"), zerolinecolor:css("--line")},
+      yaxis:{title:"Average excess return (bps / day)", gridcolor:css("--line"), zerolinecolor:css("--line")},
     }), cfg);
 
     const f = S[wt];
